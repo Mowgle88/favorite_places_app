@@ -1,4 +1,7 @@
+import 'package:favorite_places_app/constants/app_constant.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
 class LocationInput extends StatefulWidget {
@@ -11,6 +14,8 @@ class LocationInput extends StatefulWidget {
 class _LocationInputState extends State<LocationInput> {
   Location? _pickedLocation;
   var _isGettingLocation = false;
+  double? latitude;
+  double? longitude;
 
   void _getCurrentLocation() async {
     Location location = Location();
@@ -43,6 +48,8 @@ class _LocationInputState extends State<LocationInput> {
 
     setState(() {
       _isGettingLocation = false;
+      latitude = locationData.latitude;
+      longitude = locationData.longitude;
     });
 
     print(locationData.latitude);
@@ -60,6 +67,36 @@ class _LocationInputState extends State<LocationInput> {
 
     if (_isGettingLocation) {
       previewContent = const CircularProgressIndicator();
+    }
+
+    if (latitude != null && longitude != null) {
+      previewContent = FlutterMap(
+        options: MapOptions(
+          minZoom: 5,
+          maxZoom: 18,
+          zoom: 13,
+          center: LatLng(latitude!, longitude!),
+        ),
+        children: [
+          TileLayer(
+            urlTemplate:
+                'https://api.mapbox.com/styles/v1/mowgle/{mapStyleId}/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}',
+            additionalOptions: const {
+              'mapStyleId': AppConstants.mapBoxStyleId,
+              'accessToken': AppConstants.mapBoxAccessToken,
+            },
+          ),
+          MarkerLayer(
+            markers: [
+              Marker(
+                point: LatLng(latitude!, longitude!),
+                builder: (ctx) =>
+                    const Icon(Icons.location_on_rounded, color: Colors.red),
+              )
+            ],
+          )
+        ],
+      );
     }
 
     return Column(
@@ -90,7 +127,7 @@ class _LocationInputState extends State<LocationInput> {
             TextButton.icon(
               onPressed: () {},
               icon: const Icon(Icons.map),
-              label: const Text('Selekt on Map'),
+              label: const Text('Select on Map'),
             )
           ],
         )
