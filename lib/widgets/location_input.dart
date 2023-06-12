@@ -1,18 +1,21 @@
 import 'package:favorite_places_app/constants/app_constant.dart';
+import 'package:favorite_places_app/models/place.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
 class LocationInput extends StatefulWidget {
-  const LocationInput({super.key});
+  const LocationInput({super.key, required this.onSelectLocation});
+
+  final void Function(PlaceLocation location) onSelectLocation;
 
   @override
   State<LocationInput> createState() => _LocationInputState();
 }
 
 class _LocationInputState extends State<LocationInput> {
-  Location? _pickedLocation;
+  // PlaceLocation? _pickedLocation;
   var _isGettingLocation = false;
   double? latitude;
   double? longitude;
@@ -52,8 +55,12 @@ class _LocationInputState extends State<LocationInput> {
       longitude = locationData.longitude;
     });
 
-    print(locationData.latitude);
-    print(locationData.longitude);
+    widget.onSelectLocation(
+      PlaceLocation(
+        latitude: latitude!,
+        longitude: longitude!,
+      ),
+    );
   }
 
   @override
