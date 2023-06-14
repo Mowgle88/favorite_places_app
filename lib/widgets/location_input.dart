@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:geocoding/geocoding.dart' as geocoding;
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -48,17 +49,29 @@ class _LocationInputState extends State<LocationInput> {
     });
 
     locationData = await location.getLocation();
+    final lat = locationData.latitude;
+    final lng = locationData.longitude;
+
+    if (lat == null || lng == null) {
+      return;
+    }
+
+    List<geocoding.Placemark> placemarks =
+        await geocoding.placemarkFromCoordinates(lat, lng);
+    String address =
+        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.postalCode}, ${placemarks.first.country}';
 
     setState(() {
       _isGettingLocation = false;
-      latitude = locationData.latitude;
-      longitude = locationData.longitude;
+      latitude = lat;
+      longitude = lng;
     });
 
     widget.onSelectLocation(
       PlaceLocation(
         latitude: latitude!,
         longitude: longitude!,
+        address: address,
       ),
     );
   }

@@ -22,6 +22,31 @@ class PlacesDetailScreen extends StatelessWidget {
             width: double.infinity,
             height: double.infinity,
           ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 16,
+              ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  Colors.transparent,
+                  Colors.black54,
+                ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+              ),
+              child: Text(
+                place.location.address,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      color: Theme.of(context).colorScheme.onBackground,
+                    ),
+              ),
+            ),
+          )
         ],
       ),
     );
