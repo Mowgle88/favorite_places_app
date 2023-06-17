@@ -2,7 +2,6 @@ import 'package:favorite_places_app/constants/app_constant.dart';
 import 'package:favorite_places_app/models/place.dart';
 import 'package:favorite_places_app/screens/map.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:geocoding/geocoding.dart' as geocoding;
@@ -83,6 +82,10 @@ class _LocationInputState extends State<LocationInput> {
       ),
     );
 
+    setState(() {
+      _isGettingLocation = true;
+    });
+
     if (pickedLocation == null) {
       return;
     }
@@ -103,36 +106,14 @@ class _LocationInputState extends State<LocationInput> {
       previewContent = const CircularProgressIndicator();
     }
 
-    if (_pickedLocation != null) {
+    if (_pickedLocation != null && !_isGettingLocation) {
       final lat = _pickedLocation!.latitude;
-      final long = _pickedLocation!.longitude;
+      final lng = _pickedLocation!.longitude;
+      final width = MediaQuery.of(context).size.width.toInt();
 
-      previewContent = FlutterMap(
-        options: MapOptions(
-          minZoom: 5,
-          maxZoom: 18,
-          zoom: 13,
-          center: LatLng(lat, long),
-        ),
-        children: [
-          TileLayer(
-            urlTemplate:
-                'https://api.mapbox.com/styles/v1/mowgle/{mapStyleId}/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}',
-            additionalOptions: const {
-              'mapStyleId': AppConstants.mapBoxStyleId,
-              'accessToken': AppConstants.mapBoxAccessToken,
-            },
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: LatLng(lat, long),
-                builder: (ctx) =>
-                    const Icon(Icons.location_on_rounded, color: Colors.red),
-              )
-            ],
-          )
-        ],
+      previewContent = Image.network(
+        'https://api.mapbox.com/styles/v1/mowgle/${AppConstants.mapBoxStyleId}/static/pin-s+ff0000($lng,$lat)/$lng,$lat,13/${width}x170?access_token=${AppConstants.mapBoxAccessToken}',
+        // width: double.infinity,
       );
     }
 
