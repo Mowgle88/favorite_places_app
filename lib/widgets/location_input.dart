@@ -1,5 +1,6 @@
 import 'package:favorite_places_app/constants/app_constant.dart';
 import 'package:favorite_places_app/models/place.dart';
+import 'package:favorite_places_app/screens/map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,10 +17,26 @@ class LocationInput extends StatefulWidget {
 }
 
 class _LocationInputState extends State<LocationInput> {
-  // PlaceLocation? _pickedLocation;
+  PlaceLocation? _pickedLocation;
   var _isGettingLocation = false;
-  double? latitude;
-  double? longitude;
+
+  Future<void> _savePlace(double latitude, double longitude) async {
+    List<geocoding.Placemark> placemarks =
+        await geocoding.placemarkFromCoordinates(latitude, longitude);
+    String address =
+        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.postalCode}, ${placemarks.first.country}';
+
+    setState(() {
+      _isGettingLocation = false;
+      _pickedLocation = PlaceLocation(
+        latitude: latitude,
+        longitude: longitude,
+        address: address,
+      );
+    });
+
+    widget.onSelectLocation(_pickedLocation!);
+  }
 
   void _getCurrentLocation() async {
     Location location = Location();
@@ -56,24 +73,21 @@ class _LocationInputState extends State<LocationInput> {
       return;
     }
 
-    List<geocoding.Placemark> placemarks =
-        await geocoding.placemarkFromCoordinates(lat, lng);
-    String address =
-        '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.postalCode}, ${placemarks.first.country}';
+    _savePlace(lat, lng);
+  }
 
-    setState(() {
-      _isGettingLocation = false;
-      latitude = lat;
-      longitude = lng;
-    });
-
-    widget.onSelectLocation(
-      PlaceLocation(
-        latitude: latitude!,
-        longitude: longitude!,
-        address: address,
+  void _selectOnMap() async {
+    final pickedLocation = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (ctx) => const MapScreen(),
       ),
     );
+
+    if (pickedLocation == null) {
+      return;
+    }
+
+    _savePlace(pickedLocation.latitude, pickedLocation.longitude);
   }
 
   @override
@@ -89,13 +103,16 @@ class _LocationInputState extends State<LocationInput> {
       previewContent = const CircularProgressIndicator();
     }
 
-    if (latitude != null && longitude != null) {
+    if (_pickedLocation != null) {
+      final lat = _pickedLocation!.latitude;
+      final long = _pickedLocation!.longitude;
+
       previewContent = FlutterMap(
         options: MapOptions(
           minZoom: 5,
           maxZoom: 18,
           zoom: 13,
-          center: LatLng(latitude!, longitude!),
+          center: LatLng(lat, long),
         ),
         children: [
           TileLayer(
@@ -109,7 +126,7 @@ class _LocationInputState extends State<LocationInput> {
           MarkerLayer(
             markers: [
               Marker(
-                point: LatLng(latitude!, longitude!),
+                point: LatLng(lat, long),
                 builder: (ctx) =>
                     const Icon(Icons.location_on_rounded, color: Colors.red),
               )
@@ -145,7 +162,7 @@ class _LocationInputState extends State<LocationInput> {
               label: const Text('Get Current Location'),
             ),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: _selectOnMap,
               icon: const Icon(Icons.map),
               label: const Text('Select on Map'),
             )

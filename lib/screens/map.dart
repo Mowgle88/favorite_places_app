@@ -24,6 +24,8 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  LatLng? _pickedLocation;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,7 +34,12 @@ class _MapScreenState extends State<MapScreen> {
             Text(widget.isSelecting ? 'Pick your Location' : 'Your Location'),
         actions: [
           if (widget.isSelecting)
-            IconButton(onPressed: () {}, icon: const Icon(Icons.save))
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).pop(_pickedLocation);
+              },
+              icon: const Icon(Icons.save),
+            )
         ],
       ),
       body: FlutterMap(
@@ -41,6 +48,13 @@ class _MapScreenState extends State<MapScreen> {
           maxZoom: 18,
           zoom: 13,
           center: LatLng(widget.location.latitude, widget.location.longitude),
+          onTap: !widget.isSelecting
+              ? null
+              : (tapPosition, point) {
+                  setState(() {
+                    _pickedLocation = point;
+                  });
+                },
         ),
         children: [
           TileLayer(
@@ -52,14 +66,17 @@ class _MapScreenState extends State<MapScreen> {
             },
           ),
           MarkerLayer(
-            markers: [
-              Marker(
-                point:
-                    LatLng(widget.location.latitude, widget.location.longitude),
-                builder: (ctx) =>
-                    const Icon(Icons.location_on_rounded, color: Colors.red),
-              )
-            ],
+            markers: (_pickedLocation == null && widget.isSelecting)
+                ? []
+                : [
+                    Marker(
+                      point: _pickedLocation ??
+                          LatLng(widget.location.latitude,
+                              widget.location.longitude),
+                      builder: (ctx) => const Icon(Icons.location_on_rounded,
+                          color: Colors.red),
+                    )
+                  ],
           )
         ],
       ),
