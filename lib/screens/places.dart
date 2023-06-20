@@ -42,14 +42,17 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         padding: const EdgeInsets.all(8.0),
         child: FutureBuilder(
           future: _placesFuture,
-          builder: (context, snapshot) =>
-              snapshot.connectionState == ConnectionState.waiting
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : PlacesList(
-                      places: userPlaces,
-                    ),
+          builder: (context, snapshot) => snapshot.connectionState ==
+                  ConnectionState.waiting
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : PlacesList(
+                  places: userPlaces,
+                  onRemovePlace: (place) {
+                    ref.read(userPlacesProvider.notifier).removePlace(place.id);
+                  },
+                ),
         ),
       ),
     );
