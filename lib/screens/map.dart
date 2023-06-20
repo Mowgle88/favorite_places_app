@@ -42,43 +42,46 @@ class _MapScreenState extends State<MapScreen> {
             )
         ],
       ),
-      body: FlutterMap(
-        options: MapOptions(
-          minZoom: 5,
-          maxZoom: 18,
-          zoom: 13,
-          center: LatLng(widget.location.latitude, widget.location.longitude),
-          onTap: !widget.isSelecting
-              ? null
-              : (tapPosition, point) {
-                  setState(() {
-                    _pickedLocation = point;
-                  });
-                },
-        ),
-        children: [
-          TileLayer(
-            urlTemplate:
-                'https://api.mapbox.com/styles/v1/mowgle/{mapStyleId}/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}',
-            additionalOptions: const {
-              'mapStyleId': AppConstants.mapBoxStyleId,
-              'accessToken': AppConstants.mapBoxAccessToken,
-            },
+      body: Hero(
+        tag: 'map',
+        child: FlutterMap(
+          options: MapOptions(
+            minZoom: 5,
+            maxZoom: 18,
+            zoom: 13,
+            center: LatLng(widget.location.latitude, widget.location.longitude),
+            onTap: !widget.isSelecting
+                ? null
+                : (tapPosition, point) {
+                    setState(() {
+                      _pickedLocation = point;
+                    });
+                  },
           ),
-          MarkerLayer(
-            markers: (_pickedLocation == null && widget.isSelecting)
-                ? []
-                : [
-                    Marker(
-                      point: _pickedLocation ??
-                          LatLng(widget.location.latitude,
-                              widget.location.longitude),
-                      builder: (ctx) => const Icon(Icons.location_on_rounded,
-                          color: Colors.red),
-                    )
-                  ],
-          )
-        ],
+          children: [
+            TileLayer(
+              urlTemplate:
+                  'https://api.mapbox.com/styles/v1/mowgle/{mapStyleId}/tiles/256/{z}/{x}/{y}@2x?access_token={accessToken}',
+              additionalOptions: const {
+                'mapStyleId': AppConstants.mapBoxStyleId,
+                'accessToken': AppConstants.mapBoxAccessToken,
+              },
+            ),
+            MarkerLayer(
+              markers: (_pickedLocation == null && widget.isSelecting)
+                  ? []
+                  : [
+                      Marker(
+                        point: _pickedLocation ??
+                            LatLng(widget.location.latitude,
+                                widget.location.longitude),
+                        builder: (ctx) => const Icon(Icons.location_on_rounded,
+                            color: Colors.red),
+                      )
+                    ],
+            )
+          ],
+        ),
       ),
     );
   }

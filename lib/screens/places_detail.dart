@@ -24,11 +24,14 @@ class PlacesDetailScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          Image.file(
-            place.image,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
+          Hero(
+            tag: place.id,
+            child: Image.file(
+              place.image,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
           ),
           Positioned(
             bottom: 0,
@@ -45,9 +48,12 @@ class PlacesDetailScreen extends StatelessWidget {
                       ),
                     ));
                   },
-                  child: CircleAvatar(
-                    radius: 70,
-                    backgroundImage: NetworkImage(locationImage),
+                  child: Hero(
+                    tag: 'map',
+                    child: CircleAvatar(
+                      radius: 70,
+                      backgroundImage: NetworkImage(locationImage),
+                    ),
                   ),
                 ),
                 Container(
