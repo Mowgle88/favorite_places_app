@@ -61,7 +61,7 @@ class UserPlacesNotifier extends StateNotifier<List<Place>> {
     db.insert('user_places', {
       'id': newPlace.id,
       'title': newPlace.title,
-      'image': newPlace.image,
+      'image': newPlace.image.path,
       'lat': newPlace.location.latitude,
       'lng': newPlace.location.longitude,
       'address': newPlace.location.address,
