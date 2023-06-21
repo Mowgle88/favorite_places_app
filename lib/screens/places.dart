@@ -1,3 +1,4 @@
+import 'package:favorite_places_app/models/place.dart';
 import 'package:favorite_places_app/providers/user_places.dart';
 import 'package:favorite_places_app/screens/add_place.dart';
 import 'package:favorite_places_app/widgets/places_list.dart';
@@ -18,6 +19,33 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   void initState() {
     super.initState();
     _placesFuture = ref.read(userPlacesProvider.notifier).loadPlaces();
+  }
+
+  void _removePlace(Place place) {
+    ref.read(userPlacesProvider.notifier).removePlace(place.id);
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        duration: const Duration(seconds: 2),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(8),
+            topRight: Radius.circular(8),
+          ),
+        ),
+        content: Text(
+          'Place deleted',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                color: Theme.of(context).colorScheme.background,
+                fontSize: 16,
+              ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
   }
 
   @override
@@ -42,17 +70,15 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
         padding: const EdgeInsets.all(8.0),
         child: FutureBuilder(
           future: _placesFuture,
-          builder: (context, snapshot) => snapshot.connectionState ==
-                  ConnectionState.waiting
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : PlacesList(
-                  places: userPlaces,
-                  onRemovePlace: (place) {
-                    ref.read(userPlacesProvider.notifier).removePlace(place.id);
-                  },
-                ),
+          builder: (context, snapshot) =>
+              snapshot.connectionState == ConnectionState.waiting
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : PlacesList(
+                      places: userPlaces,
+                      onRemovePlace: _removePlace,
+                    ),
         ),
       ),
     );
